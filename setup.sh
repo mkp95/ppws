@@ -1,48 +1,62 @@
 #install packages
-apt update && apt -y upgrade
+apt update
+apt -y upgrade
+clear
+echo "Installing Required Programs"
+
 apt -y install stunnel4 nodejs dropbear cmake make build-essential unzip certbot ufw gcc
-
-
+clear
+echo "Setting up Firewall"
 #setup firewall
 ufw allow 22
 ufw allow 80
 ufw allow 443
 ufw enable
-
+echo "Setting up Dropbear"
 #setup dropbear
-wget -O dropbear https://raw.githubusercontent.com/mkp95/ppws/main/dropbear
+wget -O dropbear "https://raw.githubusercontent.com/mkp95/ppws/main/dropbear"
 mv dropbear /etc/default/dropbear
 
+echo "Setting up BadVPN"
 #install badvpn
-wget -O badvpn.zip https://codeload.github.com/mkp95/badvpn/zip/refs/heads/master
+wget -O badvpn.zip "https://codeload.github.com/mkp95/badvpn/zip/refs/heads/master"
 unzip badvpn.zip
 cd badvpn-master
 mkdir build && cd build
 cmake .. -DBUILD_NOTHING_BY_DEFAULT=1 -DBUILD_UDPGW=1
 make install
-wget -O badvpn.service  https://raw.githubusercontent.com/mkp95/ppws/main/badvpn.service
+wget -O badvpn.service  "https://raw.githubusercontent.com/mkp95/ppws/main/badvpn.service"
 
+echo "Setting up Tunnel"
 #setup certs for stunnel
-wget -O stunnel.conf https://raw.githubusercontent.com/mkp95/ppws/main/stunnel.conf
+wget -O stunnel.conf "https://raw.githubusercontent.com/mkp95/ppws/main/stunnel.conf"
 mv stunnel.conf /etc/stunnel.conf
-certbot certonly --standalone --preferred-challenges http -d domain
-cp /etc/letsencrypt/live/domain/privkey.pem  /etc/stunnel
-cp /etc/letsencrypt/live/domain/cert.pem /etc/stunnel/
+echo "Enter Domain to be used(make sure it has 'A' record with IP of this Server): "
+read domain
+certbot certonly --standalone --preferred-challenges http -d $domain
+cp /etc/letsencrypt/live/$domain/privkey.pem  /etc/stunnel
+cp /etc/letsencrypt/live/$domain/cert.pem /etc/stunnel/
 chmod 600 /etc/stunnel/*.pem
 
+
+echo "WebSocket Setup"
 #setup nodews
 mkdir /etc/nodews
-wget -O /etc/nodews/proxy3.js https://raw.githubusercontent.com/mkp95/ppws/main/proxy3.js
-wget -O nodews.service  https://raw.githubusercontent.com/mkp95/ppws/main/nodews.service
+wget -O /etc/nodews/proxy3.js "https://raw.githubusercontent.com/mkp95/ppws/main/proxy3.js"
+wget -O nodews.service "https://raw.githubusercontent.com/mkp95/ppws/main/nodews.service"
 
 #enable services
-cp *.service /systemd/system/
+cp *.service /etc/systemd/system/
 systemctl enable nodews.service
 systemctl enable badvpn.service
 
+echo "Enter Username: "
+read user
+echo "Enter Password: "
+read pass
 #setup blank shell
 grep -Fx -q "/bin/false" /etc/shells || echo "/bin/false" >> /etc/shells
 
 #add new user
-useradd -M user -s /bin/false
-chpasswd <<<"user:123"
+useradd -M $user -s /bin/false
+chpasswd <<<"$user:$pass"
