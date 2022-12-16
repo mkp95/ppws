@@ -1,16 +1,3 @@
-install(){
-header
-setup
-setup_firewall
-setup_dropbear
-install_badvpn
-install_cert
-install_socket
-set_user
-setup_stunnel
-
-echo "Reboot and Enjoy!!!"
-}
 header(){
 echo "SSH over Websocket Server Setup"
 echo "https://github.com/mkp95/ppws"
@@ -60,7 +47,7 @@ systemctl enable badvpn.service
 install_cert(){
 echo "Enter domain: "
 read domain
-certbot certonly --standalone --preferred-challenges http -d in1.techtrek.info -m a@$domain --noninteractive --agree-tos
+certbot certonly --standalone --preferred-challenges http -d $domain -m a@$domain --noninteractive --agree-tos
 cp /etc/letsencrypt/live/$domain/privkey.pem  /etc/stunnel
 cp /etc/letsencrypt/live/$domain/cert.pem /etc/stunnel/
 chmod 600 /etc/stunnel/*.pem
@@ -84,4 +71,18 @@ grep -Fx -q "/bin/false" /etc/shells || echo "/bin/false" >> /etc/shells
 grep -Fx -q "/usr/sbin/nologin" /etc/shells || echo "/usr/sbin/nologin" >> /etc/shells
 useradd -M $user -s /bin/false
 chpasswd <<<"$user:$pass"
+}
+
+install(){
+header
+setup
+setup_firewall
+setup_dropbear
+install_badvpn
+install_cert
+install_socket
+set_user
+setup_stunnel
+
+echo "Reboot and Enjoy!!!"
 }
