@@ -85,9 +85,3 @@ grep -Fx -q "/usr/sbin/nologin" /etc/shells || echo "/usr/sbin/nologin" >> /etc/
 useradd -M $user -s /bin/false
 chpasswd <<<"$user:$pass"
 }
-
-setup_stunnel(){
-echo "Setting up Tunnel"
-wget -O /etc/stunnel/stunnel.conf "https://raw.githubusercontent.com/mkp95/ppws/main/stunnel.conf"
-stunnel
-}
