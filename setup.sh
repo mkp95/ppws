@@ -73,7 +73,7 @@ useradd -M $user -s /bin/false
 chpasswd <<<"$user:$pass"
 }
 
-install(){
+sshws_install(){
 header
 setup
 setup_firewall
@@ -86,3 +86,4 @@ setup_stunnel
 
 echo "Reboot and Enjoy!!!"
 }
+sshws_install
