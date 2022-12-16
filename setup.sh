@@ -15,7 +15,7 @@ echo "Setting up Firewall"
 ufw allow 22
 ufw allow 80
 ufw allow 443
-ufw enable
+ufw --force enable
 }
 
 setup_dropbear(){
@@ -48,9 +48,6 @@ install_cert(){
 echo "Enter domain: "
 read domain
 certbot certonly --standalone --preferred-challenges http -d $domain -m a@$domain --noninteractive --agree-tos
-cp /etc/letsencrypt/live/$domain/privkey.pem  /etc/stunnel
-cp /etc/letsencrypt/live/$domain/cert.pem /etc/stunnel/
-chmod 600 /etc/stunnel/*.pem
 }
 
 install_socket(){
@@ -66,11 +63,23 @@ echo "Setting up User for SSH"
 echo "Enter Username: "
 read user
 echo "Enter Pass: "
-read $pass
+read pass
 grep -Fx -q "/bin/false" /etc/shells || echo "/bin/false" >> /etc/shells
 grep -Fx -q "/usr/sbin/nologin" /etc/shells || echo "/usr/sbin/nologin" >> /etc/shells
 useradd -M $user -s /bin/false
 chpasswd <<<"$user:$pass"
+}
+
+setup_stunnel(){
+    echo "Setting up STunnel"
+    wget -O /etc/stunnel/stunnel.conf "https://github.com/mkp95/ppws/raw/main/stunnel.conf"
+    cp /etc/letsencrypt/live/$domain/privkey.pem  /etc/stunnel
+    cp /etc/letsencrypt/live/$domain/cert.pem /etc/stunnel/
+    chmod 600 /etc/stunnel/*.pem
+}
+
+start_service(){
+stunnel
 }
 
 sshws_install(){
@@ -83,7 +92,7 @@ install_cert
 install_socket
 set_user
 setup_stunnel
-
+start_service
 echo "Reboot and Enjoy!!!"
 }
 sshws_install
