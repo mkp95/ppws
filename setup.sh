@@ -25,7 +25,7 @@ service dropbear start
 service dropbear stop
 sed -i 's/NO_START=1/NO_START=0/g' /etc/default/dropbear
 sed -i 's/DROPBEAR_PORT=22/DROPBEAR_PORT=40000/g' /etc/default/dropbear
-sed -i 's/DROPBEAR_BANNER=""/DROPBEAR_BANNER="/etc/banner.txt"/g' /etc/default/dropbear
+sed -i 's/DROPBEAR_BANNER=""/DROPBEAR_BANNER="\/etc\/banner.txt"/g' /etc/default/dropbear
 echo 'Get Ready Babyyyy!' > /etc/banner.txt
 service dropbear start
 }
